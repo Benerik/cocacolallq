@@ -1,0 +1,64 @@
+<%= form_for(@user_detail, :html => { :multipart => true}) do |f| %>
+  <% if @user_detail.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@user_detail.errors.count, "error") %> prohibited this user_detail from being saved:</h2>
+
+      <ul>
+      <% @user_detail.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :real_name %><br />
+    <%= f.text_field :real_name %>
+  </div>
+  <div class="field">
+    <%= f.label :street_address %><br />
+    <%= f.text_field :street_address %>
+  </div>
+<script type="text/javascript" charset="utf-8">
+$(function(){
+  $("select#user_detail_state_id").change(function(){
+    $.getJSON("/liquor_licenses/get_cities",{id: $(this).val(), ajax: 'true'}, function(j){
+            var options = '';
+      for (var i = 0; i < j.length; i++) {
+     
+        options += '<option value="' + j[i]['geoinfo_city']['id'] + '">' + j[i]['geoinfo_city']['name'] + '</option>';
+      }
+      $("select#user_detail_city_id").html(options);
+
+    })
+  })
+})
+</script>
+  <div class="field">
+    <%= f.label :state %><br />
+    <%= f.select(:state_id, GeoinfoState.find(:all, :order => 'name asc').collect {|c| [ c.name, c.id ] }) %> 
+  </div>
+  <div class="field">
+    <%= f.label :city %><br />
+   <%= f.select(:city_id, @cities_first ? @cities_first.collect {|c| [ c.name, c.id ]} : '', :selected => @selected_city ? @selected_city.id : '' ) %> 
+  </div>
+  <div class="field">
+    <%= f.label :post_code %><br />
+    <%= f.text_field :post_code %>
+  </div>
+<p>
+  <%= image_tag @user_detail.avatar ? @user_detail.avatar : 'logo.jpg', :size => "60x60" %>
+</p>
+  <p>
+    Logo<br />
+    <%= file_field_tag 'logo' %>
+  </p>
+   <div class="field">
+      <%= f.label :gender %><br />
+      <%= f.radio_button "gender", "Male" %>Male
+      <%= f.radio_button "gender", "Female" %>Female
+    </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

@@ -1,0 +1,81 @@
+<%= link_to 'Home', home_index_path %>
+<p/>
+<%= form_for :liquor_license, :html => { :method => :get} do |f| %>
+  <script type="text/javascript" charset="utf-8">
+    $(function(){
+      $("select#liquor_license_state_id").change(function(){
+        $.getJSON("/liquor_licenses/get_cities",{id: $(this).val(), ajax: 'true'}, function(j){
+          var options = '';
+          options +='<option value=""></option>';
+          for (var i = 0; i < j.length; i++) {
+       
+            options += '<option value="' + j[i]['geoinfo_city']['id'] + '">' + j[i]['geoinfo_city']['name'] + '</option>';
+          }
+          $("select#liquor_license_city_id").html(options);
+
+        })
+      })
+    })
+  </script>
+  <%= f.label :title %>
+  <%= f.text_field :title, :value => params[:liquor_license] ? params[:liquor_license][:title] : '' %>
+  <%= f.label :state %>
+  <%= f.select(:state_id, GeoinfoState.find(:all, :order => 'name asc').collect {|c| [ c.name, c.id ] }, :selected  => @state_first ? @state_first.id : '', :include_blank => true) %> 
+  <%= f.label :city %>
+  <%= f.select(:city_id, @cities_first ? @cities_first.collect {|c| [ c.name, c.id ]} : '', :selected => @selected_city ? @selected_city.id : '' , :include_blank => true) %> 
+    <%= f.label :license_type %>
+   <%= f.select(:license_type_id, LicenseType.find(:all, :order => 'license_code asc').collect {|c| [c.license_code + '-' + c.description, c.id ] },  :selected  => params[:liquor_license] ? params[:liquor_license][:license_type_id] : '', :include_blank => true) %> 
+ <br/>
+  <%= f.label :price %>
+  <%= f.text_field :price_min ,  :value => params[:liquor_license] ? params[:liquor_license][:price_min] : ''%> 
+  <%= f.text_field :price_max ,  :value => params[:liquor_license] ? params[:liquor_license][:price_max] : ''%> 
+  <h1>Listing Liquor Licenses</h1>
+
+  <table>
+    <tr>
+      <%= sortable_table_header :name => "Title",  :sort => "title" %>
+   <th>State</th>
+ <th>City</th>
+ <th>License Type</th>
+      <%= sortable_table_header :name => "Price",   :sort => "price" %>
+
+      <%= sortable_table_header :name => "Expiration Date", :sort => "expiration_date" %>
+    </tr>
+
+    <% @liquor_licenses.each do |liquor_license| %>
+      <tr>
+        <td><%= html_escape(liquor_license.title) %></td>
+         <td><%= liquor_license.state_id ? GeoinfoState.find(liquor_license.state_id).name : '' %></td>
+        <td><%= liquor_license.city_id ? GeoinfoCity.find(liquor_license.city_id).name : '' %></td>
+        <td><%= liquor_license.license_type ? liquor_license.license_type.license_code + '-' + liquor_license.license_type.description : ''%></td>   
+        <td><%=  liquor_license.price != 0 ? '$':'' %><%= liquor_license.price != 0 ? liquor_license.price  : '' %> </td>
+
+        <td><%= liquor_license.expiration_date %></td>
+      </tr>
+    <% end %>
+  </table>
+  <%= will_paginate @liquor_licenses %>
+  <br />
+  <%= submit_tag("Search") %>
+<% end %>
+ <br/>
+<table>
+  <tr><th valign="top">
+<a href="http://twitter.com/share" class="twitter-share-button" style="width: 110px; height: 20px;" data-count="horizontal">Tweet</a><script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>
+</th>
+    <th valign="top">
+<a href="http://www.google.com/buzz/post"
+    class="google-buzz-button"
+    title="Google Buzz"
+    data-url='<%= request.env["HTTP_HOST"] %>'
+    data-locale="en"
+    data-button-style="small-count"></a>
+    <script type="text/javascript" src="http://www.google.com/buzz/api/button.js"></script>
+ </th>
+  <th valign="top">
+<a name="fb_share" type="button_count" href="http://www.facebook.com/sharer.php">Share</a>
+
+<script src="http://static.ak.fbcdn.net/connect.php/js/FB.Share" type="text/javascript"></script>
+
+</th></tr>
+</table>

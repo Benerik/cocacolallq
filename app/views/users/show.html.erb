@@ -1,0 +1,22 @@
+<%= link_to 'Home', home_index_path %>
+<p/>
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Email:</b>
+  <%= html_escape(@user.email) %>
+</p>
+
+<p>
+  <b>Username:</b>
+  <%= html_escape(@user.username) %>
+</p>
+
+<p>
+  <b>Type:</b>
+  <%= @user.kind %>
+</p>
+
+
+<%= link_to 'Edit', edit_user_path(@user) %> |
+<%= link_to 'Back', users_path %>

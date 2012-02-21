@@ -1,0 +1,99 @@
+<h1>Welcome to Liquor License HQ</h1>
+<% if session[:user_id] == nil %>
+  <%= link_to "Login",:controller => "users", :action => "login" %>
+  |
+  <%= link_to "Sign Up",:controller => "users", :action => "new" %>
+<% else %>
+  <!--#displays hello (username)-->
+  hello <strong><%=session[:user_id]%></strong>.
+  <%= image_tag @valid_user.user_detail ? (@valid_user.user_detail.avatar ? @valid_user.user_detail.avatar : 'logo.jpg')  : 'logo.jpg', :size => "60x60" %>
+  <!--#creates logout link, when the link is clicked, the controller is User and the method executed will be logout.-->
+  <%= link_to "logout",:controller => "users", :action => "logout" %> | <%= link_to 'Setting User', edit_user_path(@valid_user) %>
+  | <%= link_to 'New Liquor license', new_liquor_license_path %> | 
+  <%if @valid_user.user_detail%>
+    <%= link_to 'Account Detail', edit_user_detail_path(@valid_user.user_detail) %>
+  <% else %>
+    <%= link_to 'Account Details', new_user_detail_path%>
+  <% end %>
+  | 
+  <% if @valid_user.kind =="Selling" %>
+    <%= link_to 'Liquor Licenses for Seller', :controller => "liquor_licenses", :action => "get_for_sale"%>
+  <% end %>
+  <% if @valid_user.kind =="Buying" %>
+    <%= link_to 'Liquor Licenses for Buyer', :controller => "liquor_licenses", :action => "get_for_buy"%>
+  <% end %>
+  <% if @valid_user.kind =="Both" %>
+    <%= link_to 'Liquor Licenses', :controller => "liquor_licenses", :action => "get_for_both"%>
+  <% end %>
+  |
+  <%= link_to 'My Liquor Licenses', liquor_licenses_path %>
+  |
+
+  <%= link_to 'My Auction', :controller => "liquor_licenses", :action => "get_my_auction"%>
+  |
+  <%if @valid_user.criterias %>
+    <%= link_to 'My Criteria', criterias_path %>
+  
+  <% else %>
+    <%= link_to 'New Criteria', new_criteria_path%>
+  <% end %>
+
+|
+<%= link_to "Contact Us",:controller => "users", :action => "contact_us" %>
+
+<% end %>
+
+
+<%= form_for :search, :url => { :action => "search" } do |f| %>
+
+  State <%= f.select( :id , GeoinfoState.find(:all, :order => 'name asc').collect {|c| [ c.name, c.id ] })   %>
+  <%= f.submit 'Search' %>
+<% end %>
+<h1>Listing New Liquor Licenses</h1>
+
+<table>
+  <tr>
+    <%= sortable_table_header :name => "Title",  :sort => "title" %>
+    <th>State</th>
+    <th>City</th>
+    <th>License Type</th>
+    <%= sortable_table_header :name => "Price",   :sort => "price" %>
+
+    <%= sortable_table_header :name => "Expiration Date", :sort => "expiration_date" %>
+
+  </tr>
+
+  <% @liquor_licenses.each do |liquor_license| %>
+    <tr>
+      <td><%= html_escape(liquor_license.title) %></td>
+      <td><%= liquor_license.state_id ? GeoinfoState.find(liquor_license.state_id).name : '' %></td>
+      <td><%= liquor_license.city_id ? ( GeoinfoCity.find(liquor_license.city_id) ? GeoinfoCity.find(liquor_license.city_id).name : '') : '' %></td>
+      <td><%= liquor_license.license_type ? liquor_license.license_type.license_code + '-' + liquor_license.license_type.description : ''%></td> 
+      <td> <%=  liquor_license.price != 0 ? '$':'' %> <%= liquor_license.price != 0 ? liquor_license.price  : '' %></td>
+      <td><%= liquor_license.expiration_date %></td>
+
+    </tr>
+  <% end %>
+</table>
+<%= will_paginate @liquor_licenses %>
+<br/>
+<table>
+  <tr><th valign="top">
+<a href="http://twitter.com/share" class="twitter-share-button" style="width: 110px; height: 20px;" data-count="horizontal">Tweet</a><script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>
+</th>
+    <th valign="top">
+<a href="http://www.google.com/buzz/post"
+    class="google-buzz-button"
+    title="Google Buzz"
+    data-url='<%= request.env["HTTP_HOST"] %>'
+    data-locale="en"
+    data-button-style="small-count"></a>
+    <script type="text/javascript" src="http://www.google.com/buzz/api/button.js"></script>
+ </th>
+  <th valign="top">
+<a name="fb_share" type="button_count" href="http://www.facebook.com/sharer.php">Share</a>
+
+<script src="http://static.ak.fbcdn.net/connect.php/js/FB.Share" type="text/javascript"></script>
+
+</th></tr>
+</table>

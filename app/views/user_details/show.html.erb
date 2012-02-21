@@ -1,0 +1,39 @@
+<%= link_to 'Home', home_index_path %>
+<p/>
+<p id="notice"><%= notice %></p>
+<p>
+  <b>Avatar:</b>
+   <%= image_tag @user_detail.avatar ? @user_detail.avatar : 'logo.jpg', :size => "60x60" %>
+</p>
+<p>
+  <b>Real name:</b>
+  <%= html_escape(@user_detail.real_name) %>
+</p>
+
+<p>
+  <b>Street address:</b>
+  <%= html_escape(@user_detail.street_address) %>
+</p>
+
+<p>
+  <b>State:</b>
+  <%= GeoinfoState.find(@user_detail.state_id).name %>
+</p>
+
+<p>
+  <b>City:</b>
+  <%= @user_detail.city_id ? GeoinfoCity.find(@user_detail.city_id).name : ''  %>
+</p>
+
+<p>
+  <b>Post code:</b>
+  <%= @user_detail.post_code %>
+</p>
+<p>
+ <b>Gender:</b>
+  <%= @user_detail.gender %>
+</p>
+
+
+<%= link_to 'Edit', edit_user_detail_path(@user_detail) %> |
+<%= link_to 'Back', user_details_path %>

@@ -1,0 +1,87 @@
+<%= form_for(@liquor_license) do |f| %>
+  <% if @liquor_license.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@liquor_license.errors.count, "error") %> prohibited this liquor_license from being saved:</h2>
+
+      <ul>
+        <% @liquor_license.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :title %><br />
+    <%= f.text_field :title, :maxlength => '255' ,:size => '31' %>
+  </div>
+  <div class="field">
+    <%= f.label :License_type %><br />
+
+    <%= f.select(:license_type_id, LicenseType.find(:all, :order => 'license_code asc').collect {|c| [c.license_code + '-' + c.description, c.id ] }) %> 
+
+  </div>
+<script type="text/javascript" charset="utf-8">
+$(function(){
+  $("select#liquor_license_state_id").change(function(){
+    $.getJSON("/liquor_licenses/get_cities",{id: $(this).val(), ajax: 'true'}, function(j){
+            var options = '';
+      for (var i = 0; i < j.length; i++) {
+     
+        options += '<option value="' + j[i]['geoinfo_city']['id'] + '">' + j[i]['geoinfo_city']['name'] + '</option>';
+      }
+      $("select#liquor_license_city_id").html(options);
+
+    })
+  })
+})
+</script>
+  <div class="field">
+    <%= f.label :state %><br />
+
+    <%= f.select(:state_id, GeoinfoState.find(:all, :order => 'name asc').collect {|c| [ c.name, c.id ] }) %> 
+
+  </div>
+  <div class="field">
+    <%= f.label :city %><br />
+    <%= f.select(:city_id, @cities_first ? @cities_first.collect {|c| [ c.name, c.id ]} : '', :selected => @selected_city ? @selected_city.id : '' ) %> 
+  </div>
+  <% if @valid_user.kind == 'Selling' %>
+    <div class="field">
+      <%= f.label :price %><br />
+      <%= f.text_field :price %>
+      <%= f.hidden_field :purpose , :value => 'Sell' %>
+    </div>
+  <% end %>
+  <% if @valid_user.kind == 'Buying' %>
+    <%= f.hidden_field :price , :value => '0' %>
+    <%= f.hidden_field :purpose , :value => 'Buy' %>
+  <% end %>
+  <% if @valid_user.kind == 'Both' %>
+    <script type="text/javascript">
+      function disablePrice() {
+        $("#price_css").css('display', 'none');
+        $("#liquor_license_price").val("0");
+      }
+      function enablePrice() {
+        $("#price_css").css('display', 'block');
+      }
+    </script>
+    <div class="field">
+      <%= f.label :purpose %><br />
+      <%= f.radio_button "purpose", "Sell" , :onclick => 'enablePrice();'%>Sell
+      <%= f.radio_button "purpose", "Buy" , :onclick => 'disablePrice();'%>Buy
+    </div>
+    <div class="field" id="price_css">
+      <%= f.label :price  %><br />
+      <%= f.text_field :price , :value => '0'%>
+    </div>
+  <% end %>
+  <div class="field">
+    <%= f.label :expiration_date %><br />
+    <%= f.date_select :expiration_date %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>
